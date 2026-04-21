@@ -1,0 +1,34 @@
+[tasks]
+install = "npm ci"
+lint = "npm run lint"
+typecheck = "npm run typecheck"
+test = "npm test"
+build = "npm run build"
+
+[tasks.lint]
+cmd = "npm run lint"
+deps = ["install"]
+
+[tasks.typecheck]
+cmd = "npm run typecheck"
+deps = ["install"]
+
+[tasks.test]
+cmd = "npm test"
+deps = ["install"]
+
+[tasks.build]
+cmd = "npm run build"
+deps = ["typecheck"]
+env = { NODE_ENV = "production" }
+
+[flows.ci]
+steps = ["install", "lint", "typecheck", "test", "build"]
+fail_fast = true
+
+[flows.check]
+steps = ["install", { parallel = ["lint", "typecheck"] }, "test"]
+fail_fast = true
+
+[flows.build-only]
+steps = ["install", "typecheck", "build"]

@@ -1,0 +1,20 @@
+[tasks]
+fmt = "cargo fmt --check"
+lint = "cargo clippy -- -D warnings"
+test = "cargo test"
+
+[tasks.build]
+cmd = "cargo build --release"
+deps = ["lint"]
+env = { RUST_LOG = "info" }
+
+[flows.ci]
+steps = ["fmt", "lint", "test", "build"]
+fail_fast = true
+
+[flows.check]
+steps = [{ parallel = ["fmt", "lint"] }, "test"]
+
+[flows.full]
+steps = [{ parallel = ["fmt", "lint"] }, "test", "build"]
+fail_fast = true

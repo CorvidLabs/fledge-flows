@@ -1,0 +1,39 @@
+[tasks.version-bump]
+cmd = "npm version patch --no-git-tag-version"
+env = { CI = "true" }
+
+[tasks.changelog]
+cmd = "npx conventional-changelog -p angular -i CHANGELOG.md -s"
+deps = ["version-bump"]
+
+[tasks.commit]
+cmd = "git add -A && git commit -m \"chore(release): $(node -p 'require(\"./package.json\").version')\""
+deps = ["changelog"]
+
+[tasks.tag]
+cmd = "git tag -a \"v$(node -p 'require(\"./package.json\").version')\" -m \"Release v$(node -p 'require(\"./package.json\").version')\""
+deps = ["commit"]
+
+[tasks.publish]
+cmd = "npm publish"
+deps = ["tag"]
+env = { NODE_ENV = "production" }
+
+[tasks.push]
+cmd = "git push --follow-tags"
+deps = ["tag"]
+
+[flows.release]
+steps = ["version-bump", "changelog", "commit", "tag", "publish", "push"]
+fail_fast = true
+
+[flows.dry-run]
+steps = [
+  "version-bump",
+  "changelog",
+  { run = "echo 'Dry run: skipping commit, tag, publish, push'" },
+]
+
+[flows.publish-only]
+steps = ["publish", "push"]
+fail_fast = true

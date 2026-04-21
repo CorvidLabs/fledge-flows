@@ -6,12 +6,16 @@ Each directory contains a `fledge.toml` with fully-documented tasks, flows, para
 
 ## Available Flows
 
-| Language | Path | Description |
-|----------|------|-------------|
-| Python | [`python/`](python/) | lint (ruff), format (ruff), typecheck (mypy), test (pytest) |
-| Node/TypeScript | [`node-typescript/`](node-typescript/) | build (tsc), lint (eslint), format (prettier), test (vitest) |
-| Rust | [`rust/`](rust/) | clippy, test, fmt, build, release |
-| Go | [`go/`](go/) | vet, test, build, staticcheck |
+| Path | Description |
+|------|-------------|
+| [`rust-ci/`](rust-ci/) | Rust CI — fmt, clippy, test, release build with parallel fmt+lint |
+| [`node-ci/`](node-ci/) | Node.js / TypeScript CI — lint, typecheck, test, production build |
+| [`release/`](release/) | Release flow — version bump, changelog, git tag, npm publish, push |
+| [`docker/`](docker/) | Docker build + push — lint Dockerfile, build, test image, push to registry |
+| [`python/`](python/) | Python — lint (ruff), format (ruff), typecheck (mypy), test (pytest) |
+| [`node-typescript/`](node-typescript/) | Node/TypeScript — build (tsc), lint (eslint), format (prettier), test (vitest) |
+| [`rust/`](rust/) | Rust — clippy, test, fmt, build, release |
+| [`go/`](go/) | Go — vet, test, build, staticcheck |
 
 ## Importing Flows
 

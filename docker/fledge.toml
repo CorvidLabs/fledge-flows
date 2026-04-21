@@ -1,0 +1,33 @@
+[tasks.lint]
+cmd = "hadolint Dockerfile"
+
+[tasks.build]
+cmd = "docker build -t $IMAGE_NAME:$IMAGE_TAG ."
+env = { IMAGE_NAME = "my-app", IMAGE_TAG = "latest", DOCKER_BUILDKIT = "1" }
+
+[tasks.test]
+cmd = "docker run --rm $IMAGE_NAME:$IMAGE_TAG /app/run-tests.sh"
+deps = ["build"]
+env = { IMAGE_NAME = "my-app", IMAGE_TAG = "latest" }
+
+[tasks.push]
+cmd = "docker push $IMAGE_NAME:$IMAGE_TAG"
+deps = ["build", "test"]
+env = { IMAGE_NAME = "my-app", IMAGE_TAG = "latest" }
+
+[tasks.push-latest]
+cmd = "docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest && docker push $IMAGE_NAME:latest"
+deps = ["push"]
+env = { IMAGE_NAME = "my-app", IMAGE_TAG = "latest" }
+
+[flows.ci]
+steps = ["lint", "build", "test"]
+fail_fast = true
+
+[flows.publish]
+steps = ["lint", "build", "test", "push", "push-latest"]
+fail_fast = true
+
+[flows.fast-build]
+steps = [{ parallel = ["lint", { run = "docker pull $IMAGE_NAME:latest || true" }] }, "build"]
+fail_fast = true
