@@ -1,0 +1,66 @@
+# fledge.toml — Universal starter flows
+#
+# These flows use generic commands that work across most projects.
+# For language-specific flows, see the subdirectories:
+#   python/, rust/, go/, node-typescript/, docker/, release/
+#
+# Import into your project:
+#   fledge flow --import CorvidLabs/fledge-flows
+#
+# Then customize the tasks for your toolchain.
+
+# ---------------------------------------------------------------------------
+# Tasks — replace these with your project's actual commands
+# ---------------------------------------------------------------------------
+
+[tasks]
+lint    = "echo 'Replace with your lint command (e.g. cargo clippy, ruff check ., eslint .)'"
+fmt     = "echo 'Replace with your format command (e.g. cargo fmt --check, ruff format --check .)'"
+test    = "echo 'Replace with your test command (e.g. cargo test, pytest, npm test)'"
+build   = "echo 'Replace with your build command (e.g. cargo build, npm run build)'"
+audit   = "echo 'Replace with your audit command (e.g. cargo audit, pip-audit, npm audit)'"
+
+# ---------------------------------------------------------------------------
+# Flows
+# ---------------------------------------------------------------------------
+
+# Quick pre-commit check
+[flows.check]
+description = "Quick quality check before committing"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },
+  "test",
+]
+
+# Full CI pipeline
+[flows.ci]
+description = "Full CI pipeline (lint → fmt → test → build)"
+fail_fast   = true
+steps = [
+  "fmt",
+  "lint",
+  "test",
+  "build",
+]
+
+# CI with parallel static analysis
+[flows.ci-fast]
+description = "CI with parallel static checks (faster on multi-core)"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },
+  "test",
+  "build",
+]
+
+# Full audit — all checks without stopping on failure
+[flows.audit]
+description = "All quality checks and security audit (reports all failures)"
+fail_fast   = false
+steps = [
+  "lint",
+  "fmt",
+  "test",
+  "audit",
+]
