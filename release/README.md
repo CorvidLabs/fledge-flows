@@ -1,8 +1,8 @@
 # release
 
-Fledge flow for releasing a Node.js package: version bump, changelog generation, git tag, npm publish, and push.
+Fledge lane for releasing a Node.js package: version bump, changelog generation, git tag, npm publish, and push.
 
-## Flows
+## Lanes
 
 ### `release` — Full release
 Bumps patch version → generates changelog → commits → tags → publishes to npm → pushes with tags.
@@ -46,5 +46,5 @@ fledge run publish-only
 
 - **Inline run step** — `{ run = "echo '...'" }` for simple one-liners without defining a named task
 - **Task deps chain** — each release step depends on the previous, enforcing strict ordering
-- **Dry-run flow** — subset of tasks that terminates before any destructive/external action
-- **Publish-only flow** — re-entrant partial flow for failure recovery
+- **Dry-run lane** — subset of tasks that terminates before any destructive/external action
+- **Publish-only lane** — re-entrant partial lane for failure recovery

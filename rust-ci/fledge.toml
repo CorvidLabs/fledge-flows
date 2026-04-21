@@ -8,13 +8,13 @@ cmd = "cargo build --release"
 deps = ["lint"]
 env = { RUST_LOG = "info" }
 
-[flows.ci]
+[lanes.ci]
 steps = ["fmt", "lint", "test", "build"]
 fail_fast = true
 
-[flows.check]
+[lanes.check]
 steps = [{ parallel = ["fmt", "lint"] }, "test"]
 
-[flows.full]
+[lanes.full]
 steps = [{ parallel = ["fmt", "lint"] }, "test", "build"]
 fail_fast = true

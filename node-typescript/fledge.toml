@@ -1,4 +1,4 @@
-# fledge.toml — Node.js / TypeScript project flows
+# fledge.toml — Node.js / TypeScript project lanes
 #
 # Toolchain: tsc (typecheck), eslint (lint), prettier (format), vitest (test)
 # Install:   npm install --save-dev typescript eslint prettier vitest
@@ -59,11 +59,11 @@ cmd         = "npm audit --audit-level=moderate"
 description = "Check for known vulnerabilities"
 
 # ---------------------------------------------------------------------------
-# Flows
+# Lanes
 # ---------------------------------------------------------------------------
 
 # Fast pre-commit check
-[flows.check]
+[lanes.check]
 description = "Quick quality check before committing"
 fail_fast   = true
 steps = [
@@ -72,7 +72,7 @@ steps = [
 ]
 
 # Full CI pipeline
-[flows.ci]
+[lanes.ci]
 description = "Full CI pipeline (typecheck → lint → fmt → test → build)"
 fail_fast   = true
 steps = [
@@ -84,7 +84,7 @@ steps = [
 ]
 
 # CI with parallel static analysis — faster on multi-core runners
-[flows.ci-fast]
+[lanes.ci-fast]
 description = "CI with parallel static analysis + sequential test/build"
 fail_fast   = true
 steps = [
@@ -94,7 +94,7 @@ steps = [
 ]
 
 # Auto-fix then verify
-[flows.fix]
+[lanes.fix]
 description = "Auto-fix formatting and lint, then verify everything passes"
 fail_fast   = true
 steps = [
@@ -106,7 +106,7 @@ steps = [
 ]
 
 # All checks without stopping — surface every issue
-[flows.audit]
+[lanes.audit]
 description = "All quality checks and security audit (reports all failures)"
 fail_fast   = false
 steps = [
@@ -117,8 +117,8 @@ steps = [
   "audit",
 ]
 
-# Production build flow
-[flows.release]
+# Production build lane
+[lanes.release]
 description = "Full validation and production bundle"
 fail_fast   = true
 steps = [

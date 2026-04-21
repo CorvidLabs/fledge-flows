@@ -20,14 +20,14 @@ cmd = "docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest && docker push $IMAG
 deps = ["push"]
 env = { IMAGE_NAME = "my-app", IMAGE_TAG = "latest" }
 
-[flows.ci]
+[lanes.ci]
 steps = ["lint", "build", "test"]
 fail_fast = true
 
-[flows.publish]
+[lanes.publish]
 steps = ["lint", "build", "test", "push", "push-latest"]
 fail_fast = true
 
-[flows.fast-build]
+[lanes.fast-build]
 steps = [{ parallel = ["lint", { run = "docker pull $IMAGE_NAME:latest || true" }] }, "build"]
 fail_fast = true

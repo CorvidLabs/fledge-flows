@@ -1,8 +1,8 @@
 # node-ci
 
-Fledge flow for Node.js / TypeScript projects: install, lint, type-check, test, and build.
+Fledge lane for Node.js / TypeScript projects: install, lint, type-check, test, and build.
 
-## Flows
+## Lanes
 
 ### `ci` — Full sequential CI
 Sequential install → lint → typecheck → test → build. Reliable ordering for CI pipelines.
@@ -38,6 +38,6 @@ fledge run build-only
 ## Patterns demonstrated
 
 - **Inline task deps** — `lint`, `typecheck`, `test` all depend on `install`, so `fledge run lint` always installs first
-- **Parallel step** — `{ parallel = ["lint", "typecheck"] }` in the `check` flow cuts wall-clock time
+- **Parallel step** — `{ parallel = ["lint", "typecheck"] }` in the `check` lane cuts wall-clock time
 - **Task env** — `NODE_ENV = "production"` scoped to `build` only
-- **Build-only flow** — subset of tasks for artifact generation without full test overhead
+- **Build-only lane** — subset of tasks for artifact generation without full test overhead

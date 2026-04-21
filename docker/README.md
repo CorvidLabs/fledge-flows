@@ -1,6 +1,6 @@
 # docker
 
-Fledge flow for Docker image builds: lint Dockerfile, build, test the image, push to registry, and tag latest.
+Fledge lane for Docker image builds: lint Dockerfile, build, test the image, push to registry, and tag latest.
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Fledge flow for Docker image builds: lint Dockerfile, build, test the image, pus
 - Docker daemon running with registry credentials configured
 - Set `IMAGE_NAME` and `IMAGE_TAG` env vars (or override task env in your `fledge.local.toml`)
 
-## Flows
+## Lanes
 
 ### `ci` — Build and test (no push)
 Lints the Dockerfile, builds the image, and runs the container's test suite. Safe for PRs.
