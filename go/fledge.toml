@@ -1,0 +1,132 @@
+# fledge.toml — Go project flows
+#
+# Toolchain: go vet, staticcheck, gofmt, govulncheck, go test
+# Install:
+#   go install honnef.co/go/tools/cmd/staticcheck@latest
+#   go install golang.org/x/vuln/cmd/govulncheck@latest
+#   # golangci-lint: https://golangci-lint.run/usage/install/
+#
+# Usage:
+#   fledge run ci          # full CI pipeline
+#   fledge run check       # fast pre-commit check
+#   fledge run ci-race     # CI with race detector
+#   fledge run audit       # all checks, no fail-fast
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+[tasks]
+# gofmt check — exits non-zero if files would change
+fmt     = "test -z \"$(gofmt -l .)\""
+fmt-fix = "gofmt -w ."
+
+# go vet — catches common correctness issues (misuse of sync, printf, etc.)
+vet     = "go vet ./..."
+
+# Build
+build   = "go build ./..."
+
+# Test
+[tasks.test]
+cmd         = "go test ./..."
+description = "Run test suite"
+
+[tasks.test-verbose]
+cmd         = "go test -v ./..."
+description = "Run tests with verbose output"
+
+[tasks.test-race]
+cmd         = "go test -race ./..."
+description = "Run tests with race detector (slower but catches data races)"
+
+[tasks.test-coverage]
+cmd         = "go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out"
+description = "Run tests with coverage report"
+
+# staticcheck — advanced static analysis beyond go vet
+[tasks.staticcheck]
+cmd         = "staticcheck ./..."
+description = "Run staticcheck static analysis (requires: go install staticcheck)"
+
+# golangci-lint — meta-linter (optional, requires installation)
+[tasks.lint]
+cmd         = "golangci-lint run"
+description = "Run golangci-lint (requires: https://golangci-lint.run/usage/install/)"
+
+# Security audit
+[tasks.audit]
+cmd         = "govulncheck ./..."
+description = "Check for known vulnerabilities (requires: go install govulncheck)"
+
+# Cross-compile for Linux (useful for CI running on macOS)
+[tasks.build-linux]
+cmd         = "GOOS=linux GOARCH=amd64 go build -o bin/app-linux ./..."
+description = "Cross-compile for Linux amd64"
+
+# ---------------------------------------------------------------------------
+# Flows
+# ---------------------------------------------------------------------------
+
+# Fast pre-commit check
+[flows.check]
+description = "Quick quality check before committing"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "vet"] },  # format + vet concurrently
+  "test",
+]
+
+# Full CI pipeline
+[flows.ci]
+description = "Full CI pipeline (fmt → vet → staticcheck → test → build)"
+fail_fast   = true
+steps = [
+  "fmt",          # check formatting
+  "vet",          # basic correctness checks
+  "staticcheck",  # advanced static analysis
+  "test",         # run tests
+  "build",        # verify compilation succeeds
+]
+
+# CI with parallel static analysis — faster on multi-core runners
+[flows.ci-fast]
+description = "CI with parallel static analysis (fmt + vet + staticcheck concurrently)"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "vet", "staticcheck"] },  # all analysis concurrently
+  "test",
+  "build",
+]
+
+# Race-safe CI — includes race detector (slower but thorough)
+[flows.ci-race]
+description = "CI with race detector enabled (catches data races in concurrent code)"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "vet", "staticcheck"] },
+  "test-race",  # -race flag adds overhead but catches races
+  "build",
+]
+
+# Full audit — all checks without stopping
+[flows.audit]
+description = "All quality checks and vulnerability audit (reports all failures)"
+fail_fast   = false
+steps = [
+  "fmt",
+  "vet",
+  "staticcheck",
+  "test",
+  "audit",
+]
+
+# Release validation + cross-compile
+[flows.release]
+description = "Full release validation and cross-platform build"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "vet", "staticcheck"] },
+  "test-coverage",
+  { parallel = ["build", "build-linux"] },  # native + Linux cross-compile concurrently
+]

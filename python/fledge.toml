@@ -1,0 +1,115 @@
+# fledge.toml — Python project flows
+#
+# Toolchain: ruff (lint + format), mypy (typecheck), pytest (test)
+# Install:   pip install ruff mypy pytest pytest-cov pip-audit build
+#
+# Usage:
+#   fledge run ci          # full CI pipeline
+#   fledge run check       # fast pre-commit check
+#   fledge run fix         # auto-fix formatting and lint issues
+#   fledge run audit       # all checks, no fail-fast
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+[tasks]
+# Ruff: fast Rust-based linter + formatter for Python
+lint       = "ruff check ."
+fmt        = "ruff format --check ."
+fmt-fix    = "ruff format ."
+lint-fix   = "ruff check --fix ."
+
+# mypy: static type checking
+[tasks.typecheck]
+cmd         = "mypy ."
+description = "Run static type analysis with mypy"
+
+# pytest: test runner
+[tasks.test]
+cmd         = "pytest"
+description = "Run test suite with pytest"
+
+[tasks.test-verbose]
+cmd         = "pytest -v"
+description = "Run test suite with verbose output"
+
+[tasks.test-coverage]
+cmd         = "pytest --cov=. --cov-report=term-missing"
+description = "Run tests with coverage report (requires pytest-cov)"
+
+# Security audit
+[tasks.audit]
+cmd         = "pip-audit"
+description = "Check for known vulnerabilities (requires pip-audit)"
+
+# Build distribution packages
+[tasks.build]
+cmd         = "python -m build"
+description = "Build sdist and wheel (requires build package)"
+
+# ---------------------------------------------------------------------------
+# Flows
+# ---------------------------------------------------------------------------
+
+# Fast pre-commit check
+[flows.check]
+description = "Quick quality check before committing"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },  # formatting + linting run concurrently
+  "test",
+]
+
+# Full CI pipeline
+[flows.ci]
+description = "Full CI pipeline (lint → fmt → typecheck → test)"
+fail_fast   = true
+steps = [
+  "lint",
+  "fmt",
+  "typecheck",
+  "test",
+]
+
+# CI with parallel static analysis — faster on multi-core runners
+[flows.ci-fast]
+description = "CI with parallel static analysis (lint + fmt + typecheck concurrently)"
+fail_fast   = true
+steps = [
+  { parallel = ["lint", "fmt", "typecheck"] },  # all static checks concurrently
+  "test",
+]
+
+# Auto-fix formatting and lint issues, then verify
+[flows.fix]
+description = "Auto-fix formatting and lint issues, then verify clean"
+fail_fast   = true
+steps = [
+  { run = "ruff format ." },       # fix formatting
+  { run = "ruff check --fix ." },  # fix auto-fixable lint issues
+  "lint",                           # verify no remaining lint errors
+  "fmt",                            # verify formatting is clean
+]
+
+# Full audit — all checks without stopping on failure
+[flows.audit]
+description = "All quality checks and security audit (reports all failures)"
+fail_fast   = false
+steps = [
+  "lint",
+  "fmt",
+  "typecheck",
+  "test",
+  "audit",
+]
+
+# Release flow: validate + build distribution packages
+[flows.release]
+description = "Full validation and distribution build"
+fail_fast   = true
+steps = [
+  { parallel = ["lint", "fmt", "typecheck"] },
+  "test-coverage",
+  "build",
+]

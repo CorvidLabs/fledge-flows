@@ -1,0 +1,128 @@
+# fledge.toml — Node.js / TypeScript project flows
+#
+# Toolchain: tsc (typecheck), eslint (lint), prettier (format), vitest (test)
+# Install:   npm install --save-dev typescript eslint prettier vitest
+#
+# Adjust commands to match your package manager (npm / yarn / pnpm / bun).
+#
+# Usage:
+#   fledge run ci          # full CI pipeline
+#   fledge run check       # fast pre-commit check
+#   fledge run fix         # auto-fix formatting and lint
+#   fledge run audit       # all checks, no fail-fast
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+[tasks]
+# TypeScript compiler — type check without emitting files
+typecheck  = "npx tsc --noEmit"
+
+# ESLint
+lint       = "npx eslint ."
+lint-fix   = "npx eslint . --fix"
+
+# Prettier
+fmt        = "npx prettier --check ."
+fmt-fix    = "npx prettier --write ."
+
+# Install dependencies (useful as a dep on other tasks in CI)
+install    = "npm ci"
+
+# Test with vitest
+[tasks.test]
+cmd         = "npx vitest run"
+description = "Run test suite with vitest"
+
+[tasks.test-watch]
+cmd         = "npx vitest"
+description = "Run tests in watch mode"
+
+[tasks.test-coverage]
+cmd         = "npx vitest run --coverage"
+description = "Run tests with V8 coverage report"
+
+# TypeScript compilation (emit files)
+[tasks.build]
+cmd         = "npx tsc"
+description = "Compile TypeScript to JavaScript"
+
+# For bundler-based projects — replace with your bundler
+[tasks.bundle]
+cmd         = "npx vite build"
+description = "Bundle for production with Vite"
+
+# Security audit
+[tasks.audit]
+cmd         = "npm audit --audit-level=moderate"
+description = "Check for known vulnerabilities"
+
+# ---------------------------------------------------------------------------
+# Flows
+# ---------------------------------------------------------------------------
+
+# Fast pre-commit check
+[flows.check]
+description = "Quick quality check before committing"
+fail_fast   = true
+steps = [
+  { parallel = ["typecheck", "lint", "fmt"] },  # all static checks concurrently
+  "test",
+]
+
+# Full CI pipeline
+[flows.ci]
+description = "Full CI pipeline (typecheck → lint → fmt → test → build)"
+fail_fast   = true
+steps = [
+  "typecheck",  # type errors first — no point linting broken types
+  "lint",
+  "fmt",
+  "test",
+  "build",
+]
+
+# CI with parallel static analysis — faster on multi-core runners
+[flows.ci-fast]
+description = "CI with parallel static analysis + sequential test/build"
+fail_fast   = true
+steps = [
+  { parallel = ["typecheck", "lint", "fmt"] },
+  "test",
+  "build",
+]
+
+# Auto-fix then verify
+[flows.fix]
+description = "Auto-fix formatting and lint, then verify everything passes"
+fail_fast   = true
+steps = [
+  { run = "npx prettier --write ." },  # fix formatting
+  { run = "npx eslint . --fix" },       # fix auto-fixable lint
+  "typecheck",                           # verify types still pass
+  "lint",                                # verify no remaining lint errors
+  "fmt",                                 # verify formatting is clean
+]
+
+# All checks without stopping — surface every issue
+[flows.audit]
+description = "All quality checks and security audit (reports all failures)"
+fail_fast   = false
+steps = [
+  "typecheck",
+  "lint",
+  "fmt",
+  "test",
+  "audit",
+]
+
+# Production build flow
+[flows.release]
+description = "Full validation and production bundle"
+fail_fast   = true
+steps = [
+  { parallel = ["typecheck", "lint", "fmt"] },
+  "test-coverage",
+  "bundle",
+]

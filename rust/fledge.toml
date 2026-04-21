@@ -1,0 +1,106 @@
+# fledge.toml — Rust project flows
+#
+# Demonstrates: tasks with deps, parallel groups, fail_fast, inline commands
+#
+# Usage:
+#   fledge run ci          # full CI pipeline
+#   fledge run check       # fast pre-commit check
+#   fledge run release     # release validation + build
+#   fledge run audit       # security + license audit (no fail-fast)
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+[tasks]
+# Short form: just a command string
+fmt     = "cargo fmt --check"
+fmt-fix = "cargo fmt"
+lint    = "cargo clippy -- -D warnings"
+test    = "cargo test"
+build   = "cargo build"
+
+# Full form: cmd + description + optional env/dir/deps
+[tasks.build-release]
+cmd         = "cargo build --release"
+description = "Build optimized release binary"
+
+[tasks.doc]
+cmd         = "cargo doc --no-deps"
+description = "Build API documentation"
+
+[tasks.audit]
+cmd         = "cargo audit"
+description = "Check for known security vulnerabilities (requires cargo-audit)"
+
+[tasks.license-check]
+cmd         = "cargo deny check licenses"
+description = "Verify dependency licenses (requires cargo-deny)"
+
+# Task with a dependency: 'publish' waits for 'build-release' to succeed
+[tasks.publish]
+cmd         = "cargo publish"
+description = "Publish crate to crates.io"
+deps        = ["build-release"]
+
+# ---------------------------------------------------------------------------
+# Flows
+# ---------------------------------------------------------------------------
+
+# Quick pre-commit check — fast feedback loop
+[flows.check]
+description = "Quick quality check before committing"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },  # formatting + linting run concurrently
+  "test",
+]
+
+# Full CI pipeline — mirrors what CI runs
+[flows.ci]
+description = "Full CI pipeline (fmt → lint → test → build)"
+fail_fast   = true
+steps = [
+  "fmt",    # check formatting first — fast, no compilation
+  "lint",   # clippy analysis
+  "test",   # run test suite
+  "build",  # verify debug build succeeds
+]
+
+# CI with parallel quality checks — faster on multi-core runners
+[flows.ci-fast]
+description = "CI pipeline with parallel fmt+lint (saves time on large projects)"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },  # concurrent: saves ~30s on large projects
+  "test",
+  "build",
+]
+
+# Release validation — everything must pass before publishing
+[flows.release]
+description = "Full release validation and optimized binary build"
+fail_fast   = true
+steps = [
+  { parallel = ["fmt", "lint"] },
+  "test",
+  "build-release",  # optimized binary (deps: none)
+  { run = "echo Build successful — ready to publish" },
+]
+
+# Security + license audit — continues past individual failures to surface all issues
+[flows.audit]
+description = "Security and license audit (reports all issues, does not stop on first failure)"
+fail_fast   = false  # collect all findings before reporting
+steps = [
+  "audit",
+  "license-check",
+]
+
+# Docs flow — standalone, useful to wire into CI for doc coverage
+[flows.docs]
+description = "Build project documentation"
+fail_fast   = true
+steps = [
+  "doc",
+]
