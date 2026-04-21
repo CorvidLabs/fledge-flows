@@ -1,4 +1,4 @@
-# fledge.toml — Rust project flows
+# fledge.toml — Rust project lanes
 #
 # Demonstrates: tasks with deps, parallel groups, fail_fast, inline commands
 #
@@ -44,11 +44,11 @@ description = "Publish crate to crates.io"
 deps        = ["build-release"]
 
 # ---------------------------------------------------------------------------
-# Flows
+# Lanes
 # ---------------------------------------------------------------------------
 
 # Quick pre-commit check — fast feedback loop
-[flows.check]
+[lanes.check]
 description = "Quick quality check before committing"
 fail_fast   = true
 steps = [
@@ -57,7 +57,7 @@ steps = [
 ]
 
 # Full CI pipeline — mirrors what CI runs
-[flows.ci]
+[lanes.ci]
 description = "Full CI pipeline (fmt → lint → test → build)"
 fail_fast   = true
 steps = [
@@ -68,7 +68,7 @@ steps = [
 ]
 
 # CI with parallel quality checks — faster on multi-core runners
-[flows.ci-fast]
+[lanes.ci-fast]
 description = "CI pipeline with parallel fmt+lint (saves time on large projects)"
 fail_fast   = true
 steps = [
@@ -78,7 +78,7 @@ steps = [
 ]
 
 # Release validation — everything must pass before publishing
-[flows.release]
+[lanes.release]
 description = "Full release validation and optimized binary build"
 fail_fast   = true
 steps = [
@@ -89,7 +89,7 @@ steps = [
 ]
 
 # Security + license audit — continues past individual failures to surface all issues
-[flows.audit]
+[lanes.audit]
 description = "Security and license audit (reports all issues, does not stop on first failure)"
 fail_fast   = false  # collect all findings before reporting
 steps = [
@@ -97,8 +97,8 @@ steps = [
   "license-check",
 ]
 
-# Docs flow — standalone, useful to wire into CI for doc coverage
-[flows.docs]
+# Docs lane — standalone, useful to wire into CI for doc coverage
+[lanes.docs]
 description = "Build project documentation"
 fail_fast   = true
 steps = [

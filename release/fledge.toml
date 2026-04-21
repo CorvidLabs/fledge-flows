@@ -23,17 +23,17 @@ env = { NODE_ENV = "production" }
 cmd = "git push --follow-tags"
 deps = ["tag"]
 
-[flows.release]
+[lanes.release]
 steps = ["version-bump", "changelog", "commit", "tag", "publish", "push"]
 fail_fast = true
 
-[flows.dry-run]
+[lanes.dry-run]
 steps = [
   "version-bump",
   "changelog",
   { run = "echo 'Dry run: skipping commit, tag, publish, push'" },
 ]
 
-[flows.publish-only]
+[lanes.publish-only]
 steps = ["publish", "push"]
 fail_fast = true

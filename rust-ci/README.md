@@ -1,8 +1,8 @@
 # rust-ci
 
-Fledge flow for Rust projects: format check, Clippy linting, tests, and release build.
+Fledge lane for Rust projects: format check, Clippy linting, tests, and release build.
 
-## Flows
+## Lanes
 
 ### `ci` — Full sequential CI
 Runs fmt → lint → test → build in order. Fails fast on first error. Use this for PR checks.
@@ -36,7 +36,7 @@ fledge run full
 
 ## Patterns demonstrated
 
-- **Sequential flow** with `fail_fast`
+- **Sequential lane** with `fail_fast`
 - **Parallel step** `{ parallel = ["fmt", "lint"] }` for faster wall-clock time
 - **Task deps** — `build` declares `deps = ["lint"]` so it always re-lints when run standalone
 - **Task env** — `RUST_LOG = "info"` scoped to the build task only

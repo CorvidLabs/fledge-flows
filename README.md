@@ -1,54 +1,54 @@
-# fledge-flows
+# fledge-lanes
 
-A collection of example [fledge](https://github.com/CorvidLabs/fledge) flow configurations for common project types.
+A collection of example [fledge](https://github.com/CorvidLabs/fledge) lane configurations for common project types.
 
-Each directory contains a `fledge.toml` with fully-documented tasks, flows, parallel groups, dependencies, and fail-fast settings.
+Each directory contains a `fledge.toml` with fully-documented tasks, lanes, parallel groups, dependencies, and fail-fast settings.
 
-## Available Flows
+## Available Lanes
 
 | Path | Description |
 |------|-------------|
 | [`rust-ci/`](rust-ci/) | Rust CI — fmt, clippy, test, release build with parallel fmt+lint |
 | [`node-ci/`](node-ci/) | Node.js / TypeScript CI — lint, typecheck, test, production build |
-| [`release/`](release/) | Release flow — version bump, changelog, git tag, npm publish, push |
+| [`release/`](release/) | Release lane — version bump, changelog, git tag, npm publish, push |
 | [`docker/`](docker/) | Docker build + push — lint Dockerfile, build, test image, push to registry |
 | [`python/`](python/) | Python — lint (ruff), format (ruff), typecheck (mypy), test (pytest) |
 | [`node-typescript/`](node-typescript/) | Node/TypeScript — build (tsc), lint (eslint), format (prettier), test (vitest) |
 | [`rust/`](rust/) | Rust — clippy, test, fmt, build, release |
 | [`go/`](go/) | Go — vet, test, build, staticcheck |
 
-## Importing Flows
+## Importing Lanes
 
-### Search for flows
+### Search for lanes
 
 ```bash
-fledge flow --search
+fledge lane --search
 ```
 
-This searches GitHub for repos tagged with the `fledge-flow` topic and lists available flow collections.
+This searches GitHub for repos tagged with the `fledge-lane` topic and lists available lane collections.
 
-### Import a specific flow
+### Import a specific lane
 
 ```bash
 # Import by repo and path
-fledge flow --import CorvidLabs/fledge-flows/rust
+fledge lane --import CorvidLabs/fledge-lanes/rust
 
 # Import into current project's fledge.toml
-fledge flow --import CorvidLabs/fledge-flows/python
+fledge lane --import CorvidLabs/fledge-lanes/python
 ```
 
-Imported flows are merged into your project's `fledge.toml`. Existing tasks/flows with the same name are not overwritten unless you pass `--force`.
+Imported lanes are merged into your project's `fledge.toml`. Existing tasks/lanes with the same name are not overwritten unless you pass `--force`.
 
 ### Manual import
 
 Copy the relevant `fledge.toml` into your project and adjust commands to match your toolchain:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/CorvidLabs/fledge-flows/main/rust/fledge.toml \
+curl -sL https://raw.githubusercontent.com/CorvidLabs/fledge-lanes/main/rust/fledge.toml \
   >> fledge.toml
 ```
 
-## Flow Concepts
+## Lane Concepts
 
 ### Tasks
 
@@ -72,12 +72,12 @@ fmt  = "cargo fmt --check"
 lint = "cargo clippy -- -D warnings"
 ```
 
-### Flows
+### Lanes
 
-Flows compose tasks into pipelines:
+Lanes compose tasks into pipelines:
 
 ```toml
-[flows.ci]
+[lanes.ci]
 description = "Full CI pipeline"
 fail_fast = true
 steps = [
@@ -104,7 +104,7 @@ steps = [
 - `fail_fast = false` — run all steps, collect and report all failures at the end
 
 ```toml
-[flows.audit]
+[lanes.audit]
 description = "Surface all issues, not just the first one"
 fail_fast = false
 steps = ["security-check", "license-audit", "dependency-scan"]
@@ -124,17 +124,17 @@ steps = [
 
 ### Task dependencies
 
-Dependencies are declared on tasks, not flows. When a flow runs a task, its deps run first automatically:
+Dependencies are declared on tasks, not lanes. When a lane runs a task, its deps run first automatically:
 
 ```toml
 [tasks.publish]
 cmd  = "cargo publish"
 deps = ["build-release"]  # build-release runs before publish, always
 
-[flows.release]
+[lanes.release]
 steps = ["publish"]  # fledge resolves: build-release -> publish
 ```
 
 ## Contributing
 
-PRs welcome for other languages or frameworks. Tag your repo with `fledge-flow` to make it discoverable via `fledge flow --search`.
+PRs welcome for other languages or frameworks. Tag your repo with `fledge-lane` to make it discoverable via `fledge lane --search`.

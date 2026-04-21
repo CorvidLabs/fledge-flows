@@ -1,4 +1,4 @@
-# fledge.toml — Python project flows
+# fledge.toml — Python project lanes
 #
 # Toolchain: ruff (lint + format), mypy (typecheck), pytest (test)
 # Install:   pip install ruff mypy pytest pytest-cov pip-audit build
@@ -49,11 +49,11 @@ cmd         = "python -m build"
 description = "Build sdist and wheel (requires build package)"
 
 # ---------------------------------------------------------------------------
-# Flows
+# Lanes
 # ---------------------------------------------------------------------------
 
 # Fast pre-commit check
-[flows.check]
+[lanes.check]
 description = "Quick quality check before committing"
 fail_fast   = true
 steps = [
@@ -62,7 +62,7 @@ steps = [
 ]
 
 # Full CI pipeline
-[flows.ci]
+[lanes.ci]
 description = "Full CI pipeline (lint → fmt → typecheck → test)"
 fail_fast   = true
 steps = [
@@ -73,7 +73,7 @@ steps = [
 ]
 
 # CI with parallel static analysis — faster on multi-core runners
-[flows.ci-fast]
+[lanes.ci-fast]
 description = "CI with parallel static analysis (lint + fmt + typecheck concurrently)"
 fail_fast   = true
 steps = [
@@ -82,7 +82,7 @@ steps = [
 ]
 
 # Auto-fix formatting and lint issues, then verify
-[flows.fix]
+[lanes.fix]
 description = "Auto-fix formatting and lint issues, then verify clean"
 fail_fast   = true
 steps = [
@@ -93,7 +93,7 @@ steps = [
 ]
 
 # Full audit — all checks without stopping on failure
-[flows.audit]
+[lanes.audit]
 description = "All quality checks and security audit (reports all failures)"
 fail_fast   = false
 steps = [
@@ -104,8 +104,8 @@ steps = [
   "audit",
 ]
 
-# Release flow: validate + build distribution packages
-[flows.release]
+# Release lane: validate + build distribution packages
+[lanes.release]
 description = "Full validation and distribution build"
 fail_fast   = true
 steps = [
